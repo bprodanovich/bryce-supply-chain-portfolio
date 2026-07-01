@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bryce Prodanovich — AI Enablement in Biotech Supply Chains</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0B1420;
+    --surface:#121D2E;
+    --surface-raised:#17263B;
+    --border:#243346;
+    --text:#EAF0F6;
+    --text-dim:#90A0B7;
+    --text-faint:#5C6C82;
+    --teal:#46D9C9;
+    --amber:#F5A94E;
+    --coral:#FF6B5B;
+    --blue:#6FA8FF;
+    --teal-bg:rgba(70,217,201,0.12);
+    --amber-bg:rgba(245,169,78,0.12);
+    --coral-bg:rgba(255,107,91,0.12);
+    --blue-bg:rgba(111,168,255,0.12);
+    --radius:14px;
+    --maxw:1080px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif; margin:0; letter-spacing:-0.01em;}
+  .mono{font-family:'IBM Plex Mono',monospace;}
+  a{color:inherit;}
+  .wrap{max-width:var(--maxw); margin:0 auto; padding:0 28px;}
+
+  /* scroll progress / shelf-life gauge */
+  #shelfbar{position:fixed; top:0; left:0; height:3px; width:0%; z-index:1000;
+    background:linear-gradient(90deg,var(--teal),var(--amber) 70%,var(--coral));
+    transition:width 0.08s linear;}
+
+  /* nav */
+  nav{position:sticky; top:0; z-index:100; background:rgba(11,20,32,0.88); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);}
+  nav .inner{display:flex; align-items:center; justify-content:space-between; padding:14px 28px; max-width:var(--maxw); margin:0 auto; gap:16px;}
+  .brand{font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:15px; white-space:nowrap;}
+  .brand span{color:var(--teal);}
+  .navlinks{display:flex; gap:2px; overflow-x:auto; scrollbar-width:none;}
+  .navlinks::-webkit-scrollbar{display:none;}
+  .navlinks a{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-dim); text-decoration:none;
+    padding:7px 10px; border-radius:8px; white-space:nowrap; transition:all .15s;}
+  .navlinks a:hover{color:var(--teal); background:var(--teal-bg);}
+
+  /* hero */
+  header.hero{padding:88px 0 64px; border-bottom:1px solid var(--border);}
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--teal); letter-spacing:0.08em;
+    text-transform:uppercase; margin-bottom:18px; display:flex; align-items:center; gap:10px;}
+  .eyebrow::before{content:""; width:24px; height:1px; background:var(--teal);}
+  h1.title{font-size:clamp(32px,5vw,52px); font-weight:700; max-width:760px; line-height:1.08;}
+  h1.title em{font-style:normal; color:var(--teal);}
+  .subhead{color:var(--text-dim); font-size:18px; max-width:620px; margin-top:20px;}
+  .chips{display:flex; flex-wrap:wrap; gap:10px; margin-top:28px;}
+  .chip{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--text-dim); border:1px solid var(--border);
+    padding:7px 13px; border-radius:20px; background:var(--surface);}
+
+  /* signature gauge */
+  .gauge-block{margin-top:44px; background:var(--surface); border:1px solid var(--border); border-radius:var(--radius);
+    padding:22px 24px;}
+  .gauge-label{display:flex; justify-content:space-between; font-family:'IBM Plex Mono',monospace; font-size:11px;
+    color:var(--text-faint); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.05em;}
+  .gauge{display:flex; gap:4px; height:26px;}
+  .gauge .seg{flex:1; border-radius:4px; background:var(--surface-raised);}
+  .gauge .seg.on{background:var(--teal);}
+  .gauge .seg.watch{background:var(--amber);}
+  .gauge .seg.risk{background:var(--coral);}
+  .gauge-caption{margin-top:12px; color:var(--text-dim); font-size:13.5px;}
+
+  /* section */
+  section.area{padding:76px 0; border-bottom:1px solid var(--border);}
+  section.area:last-of-type{border-bottom:none;}
+  .area-head{margin-bottom:36px;}
+  .area-num{font-family:'IBM Plex Mono',monospace; color:var(--text-faint); font-size:13px; margin-bottom:10px;}
+  .area-num b{color:var(--teal);}
+  h2.area-title{font-size:clamp(24px,3.2vw,32px);}
+  .area-note{margin-top:16px; padding:14px 18px; background:var(--blue-bg); border-left:2px solid var(--blue);
+    border-radius:0 8px 8px 0; font-size:13.5px; color:var(--text-dim); font-style:italic;}
+
+  /* concept cards */
+  .concepts{display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:40px;}
+  @media(max-width:820px){.concepts{grid-template-columns:1fr;}}
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:26px;}
+  .card h3{font-size:18px; margin-bottom:14px;}
+  .card .problem{color:var(--text-dim); font-size:14.5px; margin-bottom:16px;}
+  .card .label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.07em;
+    color:var(--teal); margin-bottom:8px; display:block;}
+  .card ul{margin:0 0 0 0; padding-left:18px; font-size:14px; color:var(--text);}
+  .card ul li{margin-bottom:6px;}
+  details{margin-top:18px; border-top:1px solid var(--border); padding-top:14px;}
+  summary{cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-dim);
+    text-transform:uppercase; letter-spacing:0.05em; list-style:none; display:flex; align-items:center; gap:8px;}
+  summary::-webkit-details-marker{display:none;}
+  summary::before{content:"+"; color:var(--teal); font-family:'Inter',sans-serif; font-size:15px; width:14px;}
+  details[open] summary::before{content:"–";}
+  details[open] summary{color:var(--teal);}
+  .detail-block{margin-top:14px;}
+  .detail-block + .detail-block{margin-top:18px;}
+  .detail-block p{font-size:13.5px; color:var(--text-dim); margin:0;}
+  .detail-block ul{font-size:13.5px; color:var(--text-dim);}
+
+  /* visuals row */
+  .visuals{display:grid; grid-template-columns:1.1fr 1fr; gap:20px;}
+  @media(max-width:820px){.visuals{grid-template-columns:1fr;}}
+  .vcard{background:var(--surface-raised); border:1px solid var(--border); border-radius:var(--radius); padding:24px; overflow:hidden;}
+  .vcard .label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:0.07em;
+    color:var(--text-faint); margin-bottom:16px; display:block;}
+
+  /* flow diagram */
+  .flow-row{display:flex; align-items:center; gap:6px; margin-bottom:14px; flex-wrap:wrap;}
+  .flow-tag{font-family:'IBM Plex Mono',monospace; font-size:10px; text-transform:uppercase; padding:2px 8px;
+    border-radius:5px; margin-bottom:10px; display:inline-block;}
+  .flow-tag.before{background:var(--coral-bg); color:var(--coral);}
+  .flow-tag.after{background:var(--teal-bg); color:var(--teal);}
+  .flow-steps{display:flex; align-items:center; flex-wrap:wrap; gap:6px;}
+  .step{font-size:12px; padding:7px 10px; border-radius:8px; background:var(--surface); border:1px solid var(--border);
+    color:var(--text-dim); white-space:nowrap;}
+  .flow-steps.after-steps .step{background:var(--teal-bg); border-color:transparent; color:var(--text);}
+  .arrow{color:var(--text-faint); font-size:13px;}
+
+  /* dashboard mockup */
+  .dtiles{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .dtile{border-radius:10px; padding:14px; border:1px solid var(--border); background:var(--surface);}
+  .dtile .v{font-family:'Space Grotesk',sans-serif; font-size:18px; font-weight:600; margin-bottom:4px;}
+  .dtile .l{font-size:11px; color:var(--text-faint); font-family:'IBM Plex Mono',monospace;}
+  .dtile.healthy{border-color:rgba(70,217,201,0.35);} .dtile.healthy .v{color:var(--teal);}
+  .dtile.watch{border-color:rgba(245,169,78,0.35);} .dtile.watch .v{color:var(--amber);}
+  .dtile.risk{border-color:rgba(255,107,91,0.35);} .dtile.risk .v{color:var(--coral);}
+  .dtile.info{border-color:rgba(111,168,255,0.35);} .dtile.info .v{color:var(--blue);}
+
+  /* tools */
+  .tools{margin-top:22px; display:flex; flex-wrap:wrap; gap:8px;}
+  .tool{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-faint); border:1px dashed var(--border);
+    padding:5px 11px; border-radius:16px;}
+
+  footer{padding:64px 0 90px; text-align:center;}
+  footer .mono{color:var(--text-faint); font-size:12px;}
+  footer h3{font-size:22px; margin-bottom:10px;}
+  footer p{color:var(--text-dim); max-width:520px; margin:0 auto 26px; font-size:14.5px;}
+</style>
+</head>
+<body>
+
+<div id="shelfbar"></div>
+
+<nav>
+  <div class="inner">
+    <div class="brand">Bryce Prodanovich <span>/ AI &amp; Supply Chain</span></div>
+    <div class="navlinks" id="navlinks"></div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap">
+    <div class="eyebrow">AI Enablement Portfolio — Biotech Supply Chains</div>
+    <h1 class="title">Turning manual supply chain cycles into <em>continuous, shelf-life-aware</em> systems.</h1>
+    <p class="subhead">Fifteen years in commercial operations at Illumina, applied toward a single question: where does AI remove the lag between a real-world signal and the decision it should trigger — across sourcing, planning, warehousing, transportation, S&amp;OP, trade compliance, delivery, and packaging.</p>
+    <div class="chips">
+      <div class="chip">15 yrs — Illumina Commercial Ops</div>
+      <div class="chip">MIT Certificate, AI Business Applications</div>
+      <div class="chip">APICS CSCP</div>
+      <div class="chip">$8M freight savings · 70%→91% OTD · −30% complaints</div>
+    </div>
+    <div class="gauge-block">
+      <div class="gauge-label"><span>Signature constraint across this portfolio</span><span>9-month shelf life</span></div>
+      <div class="gauge" id="gauge"></div>
+      <p class="gauge-caption">Every concept below is built around the same physics: a cold-chain product with a fixed, short usable life. That constraint — more than any single tool or platform — is what shapes where AI actually earns its keep in this supply chain.</p>
+    </div>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<footer>
+  <div class="wrap">
+    <h3>Let's talk about where this applies to your team.</h3>
+    <p>Sixteen concepts, eight functional areas, one throughline: AI that closes the gap between what the data already knows and what the business does next.</p>
+    <div class="mono">PORTFOLIO — AI ENABLEMENT IN BIOTECH SUPPLY CHAINS · BRYCE PRODANOVICH</div>
+  </div>
+</footer>
+
+<script>
+const DATA = [
+{
+  num:"01", id:"purchasing", title:"Purchasing, Sourcing &amp; Procurement",
+  concepts:[
+    { title:"Intelligent Purchase Intake",
+      problem:"Procurement spans $40 reagents to $2M capital equipment. Requests start as free-form email, get manually routed, re-keyed into the ERP, and chased for approvals — costing scientists days on routine purchases.",
+      approach:["Parses plain-language requests against catalog items, purchase history, and approved suppliers","Validates budget, cost center, and category compliance rules (controlled substances, export-controlled equipment, GxP materials)","Auto-populates supplier, pricing, and account coding","Routes approvals dynamically by dollar threshold and risk — skipping steps for low-risk, pre-approved buys","Flags exceptions (new supplier, price variance, restricted item) for human review"],
+      why:"Lab teams move fast, and procurement delay directly slows research timelines. Distinguishing a routine reorder from a capital purchase — and routing each correctly — gets scientists what they need faster while keeping compliance-sensitive buys controlled.",
+      considerations:["Integrates with ERP/procurement platform (SAP Ariba, Coupa, Oracle) and supplier catalogs","Needs a defined rules engine for regulated categories — a smart router, not an autonomous approver","Phase 1: indirect spend and lab consumables. Phase 2: direct materials and capital equipment with stricter human checkpoints"],
+      outcomes:["Up to 50% reduction in requisition cycle time (industry benchmark)","Fewer miscoded or misrouted requisitions","Procurement time shifts from data entry to sourcing strategy"]
+    },
+    { title:"Supplier Intelligence",
+      problem:"Supplier performance, contract terms, and pricing benchmarks live in disconnected places — contracts in PDFs, issues in email threads. Problems surface only after they've caused a disruption, and in biotech, switching suppliers can mean re-validation.",
+      approach:["Extracts key contract terms — pricing, renewal dates, volume commitments, SLAs — from PDFs automatically","Tracks supplier performance against SLAs in real time: on-time delivery, quality holds, lead-time drift","Cross-references spend against market pricing to surface renegotiation opportunities before auto-renewal","Flags concentration risk — a single-source supplier with no qualified backup","Surfaces early warning signals: financial distress, regulatory actions, geopolitical exposure"],
+      why:"Supplier disruption in biotech isn't just a cost problem — it can stall a clinical trial or manufacturing run if a validated, single-sourced material isn't available. Early visibility is the difference between manageable and a stoppage.",
+      considerations:["Requires a contract repository with extractable text (OCR for legacy paper contracts)","Integration with quality systems (supplier holds, CAPAs) for a complete picture","Best deployed first on Tier 1 critical/single-source suppliers"],
+      outcomes:["Earlier visibility into supplier risk before disruption","Renegotiation opportunities surfaced ahead of renewal deadlines","A living view of concentration risk across critical materials"]
+    }
+  ],
+  flow:{ label:"Intelligent Purchase Intake",
+    before:["Free-form email","Manual review","Re-key into ERP","Approval chase","PO issued (multi-day)"],
+    after:["Natural-language request","AI validates &amp; routes","Auto-approved or flagged","PO issued (same-day)"] },
+  dashboard:{ label:"Supplier Intelligence View",
+    tiles:[ {v:"Live",l:"Supplier risk score",s:"info"}, {v:"4",l:"Renewals due &lt;90d",s:"watch"},
+            {v:"2",l:"Concentration flags",s:"risk"}, {v:"↓ 18%",l:"Avg cycle time",s:"healthy"} ] },
+  tools:["SAP Ariba / Coupa / Oracle","Figma","Python — Plotly Dash / Streamlit","Draw.io / Lucidchart"]
+},
+{
+  num:"02", id:"planning", title:"Planning &amp; Distribution",
+  concepts:[
+    { title:"Multi-Signal Commercial Demand Sensing",
+      problem:"A monthly spreadsheet forecast is stale the moment it's approved. For a 9-month shelf-life, cold-chain product, a bad forecast isn't just working capital — it's product aging toward expiration before it reaches a customer.",
+      approach:["Ingests POS/order data, sales pipeline signals, distributor inventory, and seasonality","Weighs recent order velocity more heavily so the forecast adapts weekly, not monthly","Cross-references forecast against inventory age and remaining shelf life","Flags SKUs/regions where the forecast says \u201cship more\u201d but the product on hand is already too close to sell-by","Surfaces a rolling, continuously updated forecast instead of a static number"],
+      why:"With a 9-month total shelf life, every stale month is a meaningful share of usable product life. A forecast aware of shelf-life exposure lets planners act before product ages out, not after.",
+      considerations:["Requires sales/order data, distributor inventory visibility, and lot-level expiration data from ERP/warehouse","Cold-chain transit windows need to be modeled explicitly, not treated as generic lead time","Best piloted on one high-volume commercial line before expanding"],
+      outcomes:["Forecasts reflecting current demand, not last month's","Lower write-offs from expired cold-chain inventory","Earlier visibility into products at risk of aging out"]
+    },
+    { title:"Shelf-Life-Aware Inventory Position Optimization",
+      problem:"Manual inventory allocation treats stock as fungible — move whatever's available to wherever there's demand — without accounting for which lots are closest to expiration or which locations move product fastest.",
+      approach:["Tracks every lot's age and remaining shelf life against the 9-month window","Recommends FEFO-driven allocation, prioritizing older lots to reliable, fast-moving markets","Models cold-chain transit time so limited-life lots aren't routed where transit alone pushes them past viability","Recommends proactive repositioning to higher-velocity markets before product becomes unsellable","Flags at-risk lots early enough for commercial teams to reallocate, discount, or expedite"],
+      why:"A 9-month shelf life leaves little room for inventory sitting in the wrong place. Getting ahead of aging stock protects both revenue and availability for customers who need it.",
+      considerations:["Requires lot-level tracking with expiration visible across all distribution nodes","Cold-chain transit times need modeling per lane — they vary by region and carrier","Strongest when integrated with the demand sensing concept above"],
+      outcomes:["Reduced write-offs from expired stock","Improved fill rates from better-positioned lots","Proactive intervention instead of reactive write-off review"]
+    }
+  ],
+  flow:{ label:"Demand Sensing to Allocation Decision",
+    before:["Monthly forecast cycle","Static plan","Manual allocation review","Reactive discovery of aging stock"],
+    after:["Continuous demand sensing","Shelf-life-aware forecast","Proactive allocation","Early intervention on at-risk lots"] },
+  dashboard:{ label:"Cold-Chain Inventory Health View",
+    tiles:[ {v:"62%",l:"Lots — healthy window",s:"healthy"}, {v:"24%",l:"Lots — watch",s:"watch"},
+            {v:"14%",l:"Lots — at-risk",s:"risk"}, {v:"Rolling",l:"Forecast overlay",s:"info"} ] },
+  tools:["Figma","Python — Plotly Dash / Streamlit","Draw.io / Lucidchart"]
+},
+{
+  num:"03", id:"warehouse", title:"Warehouse Operations",
+  note:"Most volume routes through 3PL partners, so the opportunity shifts from floor-level labor orchestration (owned by the 3PL) to performance visibility, quality control, and velocity management across partners not directly operated.",
+  concepts:[
+    { title:"3PL Performance &amp; Velocity Intelligence",
+      problem:"The company doesn't control the pick, pack, or putaway process — but it owns the outcome. Performance is reviewed after the fact in a QBR, using whatever data the 3PL chooses to report.",
+      approach:["Tracks dwell time, dock-to-stock, pick/pack cycle time, order accuracy, and on-time ship rate near real time","Establishes a rolling baseline per facility/partner, so degradation reads as a trend, not a bad day","Correlates dips with volume spikes, seasonal peaks, or specific product lines","Surfaces exceptions before the next QBR, while issues are still small","Builds a data-backed performance record for negotiation leverage"],
+      why:"For cold-chain product, a 3PL's velocity directly determines how much usable shelf life reaches the customer. A partner quietly slipping on dock-to-stock time is eating product life before it even leaves the facility.",
+      considerations:["Requires a data-sharing agreement with 3PL partners (API/EDI or scheduled export) — a contractual conversation as much as technical","Best started with the highest-volume or highest-risk partner first","SLA definitions must be consistent and measurable across partners"],
+      outcomes:["Earlier detection of 3PL degradation, before customer impact","Objective performance data for QBRs and renegotiation","Less reliance on the 3PL's self-reported metrics"]
+    },
+    { title:"Receiving Quality Intelligence",
+      problem:"Incoming lots need verification against spec — product, quantity, damage, and for cold-chain, temperature integrity. Manual inspection is slow, inconsistent between shifts or partners, and often catches issues too late.",
+      approach:["Matches incoming lot data (ASN, packing slip, 3PL confirmation) against PO and spec, flagging mismatches instantly","Ingests temperature logger data at receipt, flagging excursions before the lot is put away","Uses photo capture with computer vision to flag visible damage or packaging issues","Auto-updates lot status in inventory so downstream planning reflects verified, not assumed, condition","Routes exceptions to quality/commercial teams immediately, not at a later audit"],
+      why:"A cold-chain excursion or spec mismatch that goes undetected doesn't just risk one shipment — it risks product reaching a customer in a condition that shouldn't have shipped.",
+      considerations:["Depends on what data the 3PL is willing to share at receiving — a data-access conversation as much as technical","Temperature validation ranges need defining per product family","Best piloted on a single high-value or high-risk line"],
+      outcomes:["Faster, more consistent quality detection at receipt","Reduced risk of compromised product entering usable inventory","A verifiable, auditable receiving record"]
+    }
+  ],
+  flow:{ label:"3PL Performance Monitoring Loop",
+    before:["3PL operates","Self-reported data","Reviewed quarterly (QBR)","Issues addressed retroactively"],
+    after:["3PL operates","Data streamed continuously","AI monitors SLA baseline","Exceptions flagged near real-time"] },
+  dashboard:{ label:"3PL Scorecard &amp; Receiving Quality",
+    tiles:[ {v:"96.2%",l:"On-time ship rate",s:"healthy"}, {v:"+1.4d",l:"Dock-to-stock drift",s:"watch"},
+            {v:"3",l:"Open temp excursions",s:"risk"}, {v:"128",l:"Lots inspected — 24h",s:"info"} ] },
+  tools:["Figma","Python — Plotly Dash / Streamlit","Draw.io / Lucidchart"]
+},
+{
+  num:"04", id:"transportation", title:"Transportation",
+  note:"Product moves through a network of carrier partners rather than an owned fleet, so the opportunity centers on carrier performance visibility and intelligent carrier/lane selection — not fleet dispatch or driver routing.",
+  concepts:[
+    { title:"Cold-Chain Carrier Performance &amp; Lane Intelligence",
+      problem:"Performance data is scattered across carrier portals, quality-team emails, and nowhere consolidated at all. A lane quietly degrading — longer transit, more excursions — often isn't caught until it's already cost product or a relationship.",
+      approach:["Tracks on-time delivery, transit variability, and excursion rate per carrier and per lane, not just network-wide","Establishes a rolling baseline per lane, so drift on one route isn't masked by strong network averages","Correlates excursions/delays with season, region, or mode to isolate systemic vs. one-off issues","Surfaces underperforming carrier-lane pairs before the next scheduled review","Builds a standing, data-backed record to support renewal and negotiation"],
+      why:"For a ~9-month shelf life, transit time and temperature integrity are a direct draw on remaining usable life. A quietly slipping carrier or lane is effectively shortening shelf life on every shipment it touches.",
+      considerations:["Requires carrier data feeds (EDI/API/portal) covering milestones and, where available, temperature logs","Best started on the highest-volume or highest-risk cold-chain lanes","Performance definitions must be standardized across carriers"],
+      outcomes:["Earlier detection of carrier/lane degradation","Objective data to support negotiation and network rebalancing","Less reliance on carrier self-reported metrics"]
+    },
+    { title:"Carrier Selection &amp; Routing Intelligence",
+      problem:"Carrier choice is often habit or standing contract, not a real-time read on which partner fits that lane, that shipment's shelf-life exposure, and that day's conditions. For product near its sell-by window, the wrong choice matters a lot.",
+      approach:["Scores available carriers per lane on cost, reliability, transit consistency, and excursion history","Weights carrier reliability and speed more heavily as a lot's remaining shelf life shrinks","Recommends the best-fit carrier per shipment rather than defaulting to a standing assignment","Flags shipments where no option clears the shelf-life risk threshold, so a planner can intervene","Learns from outcomes — actual performance feeds back into future recommendations"],
+      why:"A lot with six months left has more room for a slower carrier than one with three weeks. Matching selection to shelf-life exposure protects the highest-risk product without over-engineering every shipment.",
+      considerations:["Depends on the same performance data foundation as the monitoring concept above","Requires shipment-level remaining shelf life at time of dispatch","Must respect existing carrier contracts and volume commitments as constraints"],
+      outcomes:["Reduced risk of high-value shipments landing with underperforming carriers","More consistent, defensible carrier assignment logic","A feedback loop that improves scoring over time"]
+    }
+  ],
+  flow:{ label:"Carrier Selection Decision Flow",
+    before:["Shipment ready","Default/standing carrier","Shipment out","Performance reviewed later, if at all"],
+    after:["Shipment ready","AI scores carriers vs. lane &amp; shelf life","Best-fit recommended","Outcome feeds scoring"] },
+  dashboard:{ label:"Carrier &amp; Lane Performance Scorecard",
+    tiles:[ {v:"94.8%",l:"Network on-time rate",s:"healthy"}, {v:"6",l:"Lanes trending down",s:"watch"},
+            {v:"2",l:"Excursions — 7 days",s:"risk"}, {v:"41",l:"Shipments — auto-recommended",s:"info"} ] },
+  tools:["Figma","Python — Plotly Dash / Streamlit","Draw.io / Lucidchart"]
+},
+{
+  num:"05", id:"sop", title:"Sales &amp; Operations Planning (S&amp;OP)",
+  concepts:[
+    { title:"AI-Driven Demand Consensus &amp; Bias Correction",
+      problem:"Sales, commercial, and supply planning walk into consensus meetings with three different forecasts on three different assumptions. Reconciling them is manual, spreadsheet-heavy negotiation that never surfaces why they diverged.",
+      approach:["Ingests each function's forecast input and quantifies where and why they diverge, by SKU, region, or account","Tracks each source's historical accuracy and directional bias over time and applies a correction — not treating every input equally","Surfaces a data-driven starting consensus before the meeting, shifting the conversation from \u201cwhose number wins\u201d to \u201cwhat does the data say\u201d","Flags the SKUs/regions with the largest variance for focused discussion","Tracks accuracy over time by source and product line, closing the feedback loop"],
+      why:"Forecast accuracy has an outsized impact when shelf life is short and cold-chain inventory is costly to hold or expedite. Making bias visible is the first step to correcting it.",
+      considerations:["Requires historical forecast-vs-actual data by source — a data hygiene exercise as much as modeling","Best piloted on a line with a chronic, well-understood accuracy gap","Doesn't replace the S&amp;OP meeting — shifts it from reconciliation to exception-driven decisions"],
+      outcomes:["Improved accuracy through systematic bias correction","Shorter meetings centered on real variance","A standing accuracy scorecard by source, creating accountability"]
+    },
+    { title:"Scenario Planning &amp; Constraint Simulation",
+      problem:"Even a well-reconciled forecast is a single point estimate. A tender award or a competitor disruption can shift volume fast, and running a manual what-if in a spreadsheet takes days — by which point the decision window may have closed.",
+      approach:["Models demand, supply capacity, and inventory/shelf-life position so one input change ripples to a realistic output","Runs multiple demand scenarios simultaneously — upside, downside, event-driven shocks — and shows the capacity/inventory/fill-rate impact","Simulates supply-side constraints too: capacity limits, lane disruption, single-source shortages","Surfaces the earliest point action would need to be taken for each scenario to stay viable","Presents scenarios side by side, grounding trade-off discussions in modeled outcomes"],
+      why:"Biotech demand is genuinely volatile, and a 9-month shelf life means an unplanned spike can't just be absorbed with more safety stock — there's a limit to what can sit on a shelf before it expires.",
+      considerations:["Requires a connected view of demand, supply capacity, and inventory/shelf-life data","Strongest when built on the demand sensing and inventory positioning work in planning &amp; distribution","Best introduced as decision support, not a fully automated planning system"],
+      outcomes:["What-if turnaround from days to minutes","Proactive identification of capacity/inventory risk","S&amp;OP conversations grounded in modeled trade-offs, not gut feel"]
+    }
+  ],
+  flow:{ label:"From Divergent Forecasts to Data-Driven Consensus",
+    before:["3 separate forecasts","Manual spreadsheet reconciliation","Negotiated consensus","Accuracy issues recur"],
+    after:["Multiple forecast inputs","AI bias correction &amp; variance analysis","Data-driven consensus","Accuracy tracked &amp; fed back"] },
+  dashboard:{ label:"Forecast Accuracy &amp; Scenario Planning",
+    tiles:[ {v:"±6%",l:"Blended forecast error",s:"healthy"}, {v:"+15%",l:"Sales bias — new launches",s:"watch"},
+            {v:"3",l:"Scenarios modeled",s:"info"}, {v:"2 SKUs",l:"Flagged for review",s:"risk"} ] },
+  tools:["Figma","Python — Plotly Dash / Streamlit","Draw.io / Lucidchart"]
+},
+{
+  num:"06", id:"compliance", title:"Trade Compliance",
+  concepts:[
+    { title:"AI-Powered HS Code &amp; ECCN Classification",
+      problem:"Biotech R&amp;D introduces new materials constantly, and every one needs an HS code and ECCN determination before it can cross a border. Classification is manual, slow, inconsistent between analysts, and doesn't scale with R&amp;D's pace.",
+      approach:["Pulls technical description, safety data sheet, and specs from the requisition or supplier documentation","Uses an LLM (Claude or GPT-4o via API) to propose a candidate HS code and ECCN, with reasoning shown","Cross-references against prior classifications for similar materials, flagging inconsistencies","Routes the proposal to a compliance analyst for review and sign-off — a recommendation engine, not an autonomous classifier","Once approved, auto-populates the ERP/trade compliance system and logs the rationale for audit"],
+      why:"New material classification is one of the highest-friction, most repetitive tasks in trade compliance — and one of the easiest to get wrong under time pressure. A well-reasoned starting point speeds analysts up without removing required human judgment.",
+      considerations:["Currently in design/concept phase — a demonstration of AI systems thinking and architecture, not a claim of a live production system","Recommended stack: Claude or GPT-4o API, Power Automate for orchestration, SAP integration for requisition data","Requires a defined review/approval step — full autonomy isn't appropriate given regulatory stakes"],
+      outcomes:["Faster turnaround from \u201cnew material requested\u201d to \u201ccleared for shipment\u201d","More consistent classification across analysts and time","A defensible, auditable rationale behind every determination"]
+    },
+    { title:"Restricted &amp; Denied Party Screening Intelligence",
+      problem:"Every new customer, supplier, and shipping party needs screening against denied/restricted/sanctioned lists that change frequently. Rules-based tools generate high false-positive volume, training teams to move past alerts instead of scrutinizing them.",
+      approach:["Screens parties against current lists on an ongoing basis, not just at onboarding","Uses entity resolution — name variations, addresses, aliases, ownership structure — to separate genuine matches from coincidence","Scores and ranks matches by confidence, so analyst time goes to alerts that actually warrant it","Flags changes — a previously cleared party newly listed, or an ownership change introducing new risk","Maintains a full audit log of every result and analyst decision"],
+      why:"Biotech ships globally to a wide, constantly changing partner base. A missed match carries serious regulatory risk; a too-noisy tool trains people to ignore it, which is arguably worse.",
+      considerations:["Requires a reliable, regularly updated denied/restricted/sanctioned party feed","Entity resolution logic needs tuning to the actual customer/supplier base","Should integrate with purchase intake and customer onboarding so screening is automatic"],
+      outcomes:["Reduced false-positive volume, freeing analyst time for real risk","Continuous screening catching list changes on existing relationships","A stronger, more auditable compliance posture"]
+    }
+  ],
+  flow:{ label:"New Material Classification Workflow (6 steps)",
+    before:["New material request","Technical data pulled"],
+    after:["AI proposes HS/ECCN + reasoning","Prior-classification cross-check","Analyst review &amp; approval","Stored &amp; logged"] },
+  dashboard:{ label:"Compliance Command Center",
+    tiles:[ {v:"12",l:"Classifications pending",s:"info"}, {v:"91%",l:"AI-proposal confidence, avg",s:"healthy"},
+            {v:"3",l:"Screening alerts to review",s:"watch"}, {v:"0",l:"Unresolved risk flags",s:"healthy"} ] },
+  tools:["Claude or GPT-4o API","Power Automate","SAP integration","Figma","Python — Plotly Dash / Streamlit"]
+},
+{
+  num:"07", id:"delivery", title:"Delivery &amp; Customer Experience",
+  note:"With transportation handled by carrier partners rather than an owned fleet, delivery visibility is a data consolidation problem as much as a customer communication one — status lives in multiple carrier systems.",
+  concepts:[
+    { title:"Proactive Order Status &amp; Delivery Communication",
+      problem:"A customer waiting on a shipment has to reach out and ask where it is. For cold-chain product, \u201cwhere's my order\u201d is often really \u201cwill this still be usable when it arrives\u201d — a question the current process isn't built to answer proactively.",
+      approach:["Aggregates tracking and milestone data from every carrier partner into one consistent status view per shipment","Automatically notifies customers at key milestones — shipped, in transit, out for delivery, delivered — without an inbound ask","Detects delays or plan deviations and proactively alerts customer and internal teams before the window is missed","For cold-chain, surfaces relevant context — temperature integrity confirmed, or a delay's effect on remaining shelf life","Gives customer service a single view to answer instantly instead of chasing the answer across systems"],
+      why:"For customers receiving temperature-sensitive product, delivery uncertainty affects their own planning around usability. Proactive visibility turns delivery communication into a trust-building part of the relationship.",
+      considerations:["Requires data-sharing and integration (API/EDI) with every carrier partner — format consistency is a real challenge","Notification logic needs tuning to avoid over-alerting on routine, on-time shipments","Best piloted on highest-volume or highest-value accounts first"],
+      outcomes:["Reduced inbound \u201cwhere's my order\u201d inquiries","Earlier customer awareness of delays","A more consistent delivery experience across a multi-carrier network"]
+    },
+    { title:"Delivery Status Reconciliation &amp; Exception Resolution",
+      problem:"Multiple carriers and internal systems each hold pieces of a shipment's status. Gaps and inconsistencies are common — \u201cdelivered\u201d in one system, \u201cin transit\u201d in another — and closing them today is manual and reactive.",
+      approach:["Cross-references shipment status across order management, carrier feeds, and proof-of-delivery data to find mismatches","Flags shipments with stalled or inconsistent status for investigation before a customer notices","Auto-resolves straightforward gaps — e.g., matching a POD scan to a shipment still showing in transit","Routes genuine exceptions (lost shipment, failed delivery, damage) to the right team with full status history attached","Maintains a complete, accurate status record end-to-end"],
+      why:"An incomplete or inconsistent delivery record can mean a genuine problem goes unnoticed until a customer complaint surfaces it. Closing gaps proactively protects the relationship and gives an accurate operational picture.",
+      considerations:["Requires consistent data feeds from every system holding shipment status","Auto-resolution logic should start narrow — clear, low-risk matches only — and expand as confidence grows","Should feed the same data used in carrier performance intelligence in transportation"],
+      outcomes:["Fewer customer-facing surprises from incomplete status","Faster resolution of genuine exceptions with full context","A more complete, trustworthy delivery record across the network"]
+    }
+  ],
+  flow:{ label:"From Reactive Inquiry to Proactive Communication",
+    before:["Customer waits","Customer inquires","CS checks carrier portal","Delayed manual response"],
+    after:["Status aggregated across carriers","Milestone &amp; exception detection","Proactive notification","CS has instant visibility"] },
+  dashboard:{ label:"Delivery Visibility &amp; Exception Console",
+    tiles:[ {v:"312",l:"Shipments — on-time",s:"healthy"}, {v:"9",l:"Shipments — at-risk",s:"watch"},
+            {v:"2",l:"Status mismatches open",s:"risk"}, {v:"58",l:"Proactive notifications sent",s:"info"} ] },
+  tools:["Figma","Python — Plotly Dash / Streamlit","Power Automate","Draw.io / Lucidchart"]
+},
+{
+  num:"08", id:"packaging", title:"Packaging Engineering",
+  concepts:[
+    { title:"AI-Assisted Cold-Chain Packaging Qualification",
+      problem:"Cold-chain configurations — insulated shippers, gel packs, dry ice, phase-change materials — must be qualified to hold temperature for a given duration and lane. Qualification is manual, and tracking what's actually been validated for what use case becomes its own management problem as lines and lanes multiply.",
+      approach:["Centralizes thermal profile test results and qualification documentation in a structured, searchable system","Given a new product/duration/lane/season combination, matches against existing qualified configurations and flags whether re-qualification is needed","Analyzes historical thermal data to find configurations with the thinnest margin, prioritizing engineering attention there","Surfaces qualification expirations or spec changes (new gel pack supplier, revised insulation) requiring re-validation","Maintains a full audit trail supporting regulatory and quality documentation"],
+      why:"An unqualified or thin-margin configuration is a direct risk to product integrity — it's the physical layer protecting temperature-sensitive product for the whole time it's outside controlled storage.",
+      considerations:["Requires digitizing existing thermal profile and qualification data — a real consolidation effort up front","Should be scoped with packaging engineering and quality together, given the regulatory weight","Best piloted on lines/lanes with the most configurations in active use"],
+      outcomes:["Faster determination of whether an existing qualified configuration applies","Earlier visibility into thin-margin configurations","A centralized, auditable qualification record"]
+    },
+    { title:"Packaging Space Utilization Optimization",
+      problem:"Box and shipper selection is typically based on standard tiers or judgment, not a real-time calculation of best fit — leading to oversized packaging, wasted space, and avoidable dimensional-weight freight cost.",
+      approach:["Calculates optimal packaging configuration from order contents against available tiers and qualified configurations","Factors dimensional-weight pricing into the recommendation, not just physical fit","Flags orders in oversized packaging as a pattern to correct via packer guidance or automated recommendation","Respects cold-chain qualification constraints — only recommends configurations already validated for that use case","Tracks packaging and freight cost trends by product line to inform tier redesign"],
+      why:"Cold-chain packaging is expensive relative to standard cartons, so waste from mismatched selection has an outsized cost impact. Optimizing within qualified boundaries protects cost and integrity together.",
+      considerations:["Requires accurate product dimension/weight data and a defined set of packaging tiers with qualified use cases","Should integrate directly with the qualification intelligence above","Best piloted on a high-volume line with several tier options"],
+      outcomes:["Reduced packaging material and dimensional-weight freight cost","Fewer instances of oversized packaging driving avoidable cost","A data-backed view of where standard tiers need redesign"]
+    }
+  ],
+  flow:{ label:"From Manual Selection to Optimized, Qualified Packaging",
+    before:["Order ready","Packer selects tier by habit","Package shipped","Inefficiency found only in aggregate"],
+    after:["Order contents analyzed","Optimizer recommends best-fit, qualified config","Package shipped","Data feeds tier redesign"] },
+  dashboard:{ label:"Packaging Qualification &amp; Utilization Console",
+    tiles:[ {v:"37",l:"Qualified configurations",s:"healthy"}, {v:"4",l:"Nearing re-validation",s:"watch"},
+            {v:"1",l:"Thin-margin flag",s:"risk"}, {v:"−11%",l:"Dim-weight cost, trailing 90d",s:"info"} ] },
+  tools:["Figma","Python — Plotly Dash / Streamlit","Draw.io / Lucidchart"]
+}
+];
+
+function statusClass(s){ return s; }
+
+function conceptCard(c){
+  return `<div class="card">
+    <h3>${c.title}</h3>
+    <p class="problem">${c.problem}</p>
+    <span class="label">AI Approach</span>
+    <ul>${c.approach.map(a=>`<li>${a}</li>`).join('')}</ul>
+    <details>
+      <summary>Why it matters · Implementation · Outcomes</summary>
+      <div class="detail-block">
+        <span class="label">Why It Matters in Biotech</span>
+        <p>${c.why}</p>
+      </div>
+      <div class="detail-block">
+        <span class="label">Implementation Considerations</span>
+        <ul>${c.considerations.map(a=>`<li>${a}</li>`).join('')}</ul>
+      </div>
+      <div class="detail-block">
+        <span class="label">Expected Outcomes</span>
+        <ul>${c.outcomes.map(a=>`<li>${a}</li>`).join('')}</ul>
+      </div>
+    </details>
+  </div>`;
+}
+
+function flowDiagram(f){
+  return `<div class="vcard">
+    <span class="label">Process Flow — ${f.label}</span>
+    <div class="flow-tag before">Before</div>
+    <div class="flow-steps">${f.before.map((s,i)=>`<span class="step">${s}</span>${i<f.before.length-1?'<span class="arrow">→</span>':''}`).join('')}</div>
+    <div style="height:16px;"></div>
+    <div class="flow-tag after">After</div>
+    <div class="flow-steps after-steps">${f.after.map((s,i)=>`<span class="step">${s}</span>${i<f.after.length-1?'<span class="arrow">→</span>':''}`).join('')}</div>
+  </div>`;
+}
+
+function dashboardMockup(d){
+  return `<div class="vcard">
+    <span class="label">Dashboard Mockup — ${d.label}</span>
+    <div class="dtiles">
+      ${d.tiles.map(t=>`<div class="dtile ${statusClass(t.s)}"><div class="v">${t.v}</div><div class="l">${t.l}</div></div>`).join('')}
+    </div>
+  </div>`;
+}
+
+function sectionHTML(s){
+  return `<section class="area" id="${s.id}">
+    <div class="wrap">
+      <div class="area-head">
+        <div class="area-num"><b>${s.num}</b> / 08</div>
+        <h2 class="area-title">${s.title}</h2>
+        ${s.note ? `<div class="area-note">${s.note}</div>` : ''}
+      </div>
+      <div class="concepts">${s.concepts.map(conceptCard).join('')}</div>
+      <div class="visuals">${flowDiagram(s.flow)}${dashboardMockup(s.dashboard)}</div>
+      <div class="tools">${s.tools.map(t=>`<span class="tool">${t}</span>`).join('')}</div>
+    </div>
+  </section>`;
+}
+
+document.getElementById('main').innerHTML = DATA.map(sectionHTML).join('');
+document.getElementById('navlinks').innerHTML = DATA.map(s=>`<a href="#${s.id}">${s.num}</a>`).join('');
+
+// gauge — 9 segments representing the 9-month shelf life
+const gaugeEl = document.getElementById('gauge');
+let segHTML = '';
+for(let i=0;i<9;i++){
+  let cls = 'seg';
+  if(i < 5) cls += ' on';
+  else if(i < 7) cls += ' watch';
+  else cls += ' risk';
+  segHTML += `<div class="${cls}"></div>`;
+}
+gaugeEl.innerHTML = segHTML;
+
+// scroll progress bar (shelf-life motif)
+window.addEventListener('scroll', () => {
+  const h = document.documentElement;
+  const pct = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+  document.getElementById('shelfbar').style.width = pct + '%';
+});
+</script>
+</body>
+</html>
